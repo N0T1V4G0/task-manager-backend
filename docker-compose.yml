@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  db:
+    container_name: ebytr_db
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DATABASE: 'ebytr'
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      timeout: 10s
+      retries: 1
+  node:
+    image: node:16
+    container_name: ebytr
+    tty: true
+    stdin_open: true
+    command: npm run dev
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+
+networks:
+  default:
+    name: ebytr_net
